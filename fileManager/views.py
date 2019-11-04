@@ -10,6 +10,10 @@ def index(request):
     return Response(os.listdir(STATIC_PATH))
 
 @api_view(['GET'])
+def view(request, id):
+    return Response(os.listdir(STATIC_PATH+'/'+str(id)))
+
+@api_view(['GET'])
 def create(request, id):
     dirName = STATIC_PATH + '/' +id
     if not os.path.exists(dirName):
