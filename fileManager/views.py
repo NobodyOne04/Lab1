@@ -11,7 +11,10 @@ def index(request):
 
 @api_view(['GET'])
 def view(request, id):
-    return Response(os.listdir(STATIC_PATH+'/'+str(id)))
+    if os.path.exists(STATIC_PATH+'/'+str(id)):
+        return Response(os.listdir(STATIC_PATH+'/'+str(id)))
+    else:
+        return Response({'response':'path '+ STATIC_PATH+'/'+str(id) + ' is not exist'})
 
 @api_view(['GET'])
 def create(request, id):
@@ -28,8 +31,12 @@ def delete(request, id):
     pathToFile = STATIC_PATH + '/' + str(id)
     print(pathToFile)
     if os.path.exists(pathToFile):
-        os.rmdir(pathToFile)
-        response = "Directory " + str(id) +  " Deleted "
+        if os.path.isfile(pathToFile): response = "You try to delete file"
+        elif os.listdir(pathToFile) == []:
+            os.rmdir(pathToFile)
+            response = "Directory " + str(id) +  " Deleted "
+        else:
+            response = "Directory is not empty"
     else:    
         response = "Directory not exists " + str(id)
     return Response({"response":response})
@@ -39,7 +46,10 @@ def download(request, id):
     for file in os.listdir(STATIC_PATH):
         if id == file.split('.')[0]: id = file
     path_to_file = STATIC_PATH + '/' + str(id)
-    FilePointer = open(path_to_file,"r")
-    response = HttpResponse(FilePointer,content_type='application/msword')
-    response['Content-Disposition'] = 'attachment; filename=NameOfFile'
-    return response
+    if os.path.exists(path_to_file):
+        FilePointer = open(path_to_file,"r")
+        response = HttpResponse(FilePointer,content_type='application/msword')
+        response['Content-Disposition'] = 'attachment; filename=NameOfFile'
+        return response
+    else:
+        return Response({'response':'path '+path_to_file+' is not exist'})
